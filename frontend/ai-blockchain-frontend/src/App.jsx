@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import {
   PieChart,
@@ -26,6 +26,16 @@ function App() {
 
     return () => clearInterval(timer);
   }, []);
+const dashboardRef = useRef(null);
+const threatsRef = useRef(null);
+const blockchainRef = useRef(null);
+const reportsRef = useRef(null);
+
+const scrollToSection = (ref) => {
+  ref.current?.scrollIntoView({
+    behavior: "smooth",
+  });
+};
 
   const pieData = [
     { name: "Phishing", value: 40 },
@@ -64,15 +74,37 @@ function App() {
   </p>
 </div>
 
-  <button>Dashboard</button>
-  <button>Threats</button>
-  <button>Blockchain Logs</button>
-  <button>Reports</button>
+<button
+  onClick={() => scrollToSection(dashboardRef)}
+>
+  Dashboard
+</button>
+
+<button
+  onClick={() => scrollToSection(threatsRef)}
+>
+  Threats
+</button>
+
+<button
+  onClick={() => scrollToSection(blockchainRef)}
+>
+  Blockchain Logs
+</button>
+
+<button
+  onClick={() => scrollToSection(reportsRef)}
+>
+  Reports
+</button>
 
 </div>
       </nav>
 
-      <div className="p-10">
+     <div
+  className="p-10"
+  ref={dashboardRef}
+>
 
         {/* Header */}
 <div className="flex justify-between items-center">
@@ -152,7 +184,11 @@ function App() {
 
 </div>
         {/* Recent Threat Alerts */}
-        <div className="mt-12">
+        {/* Recent Threat Alerts */}
+<div
+  className="mt-12"
+  ref={threatsRef}
+>
 
           <h3 className="text-2xl font-bold text-green-400 mb-4">
             Recent Threat Alerts
@@ -279,7 +315,11 @@ function App() {
         </div>
 
         {/* Blockchain Logs */}
-        <div className="mt-12">
+        {/* Blockchain Logs */}
+<div
+  className="mt-12"
+  ref={blockchainRef}
+>
 
           <h3 className="text-2xl font-bold text-green-400 mb-4">
             Blockchain Verification Logs
@@ -634,7 +674,11 @@ function App() {
 
 </div>
 {/* Compliance Monitoring */}
-<div className="mt-12">
+{/* Compliance Monitoring */}
+<div
+  className="mt-12"
+  ref={reportsRef}
+>
 
   <h3 className="text-2xl font-bold text-green-400 mb-4">
     Compliance Monitoring
