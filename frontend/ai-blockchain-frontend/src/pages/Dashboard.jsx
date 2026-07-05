@@ -136,8 +136,17 @@ export default function Dashboard({ user, accessToken, globalSearch }) {
   const mediumCount = alerts.filter(a => a.severity === "Medium").length;
   const lowCount = alerts.filter(a => a.severity === "Low" || a.severity === "Normal").length;
 
-  const handleAcknowledgeAll = () => {
-    alert("All active threat alerts have been acknowledged.");
+  const handleAcknowledgeAll = async () => {
+    try {
+      await fetch("/api/events/alerts/acknowledge-all", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      setAlerts(alerts.map(a => ({ ...a, status: "Resolved" })));
+      alert("All active threat alerts have been acknowledged.");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleMarkFalsePositive = () => {

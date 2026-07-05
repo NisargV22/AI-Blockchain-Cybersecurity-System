@@ -16,6 +16,7 @@ import IncidentPlaybooks from "./pages/IncidentPlaybooks";
 import Analytics from "./pages/Analytics";
 import ApiSettings from "./pages/ApiSettings";
 import RetentionSettings from "./pages/RetentionSettings";
+import AdminUsers from "./pages/AdminUsers";
 
 function ProtectedRoute({ children, allowedRoles, userRole }) {
   if (!allowedRoles.includes(userRole)) {
@@ -273,7 +274,7 @@ export default function App() {
             <Route
               path="/settings"
               element={
-                <ProtectedRoute allowedRoles={["soc"]} userRole={user.role}>
+                <ProtectedRoute allowedRoles={["soc", "admin"]} userRole={user.role}>
                   <Settings user={user} accessToken={accessToken} />
                 </ProtectedRoute>
               }
@@ -284,6 +285,15 @@ export default function App() {
               element={
                 <ProtectedRoute allowedRoles={["employee"]} userRole={user.role}>
                   <EmployeePortal user={user} />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin-users"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]} userRole={user.role}>
+                  <AdminUsers accessToken={accessToken} />
                 </ProtectedRoute>
               }
             />

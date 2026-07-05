@@ -13,6 +13,7 @@ const complianceRoutes = require("./modules/compliance/compliance.routes");
 const auditRoutes = require("./modules/audit/audit.routes");
 const siemRoutes = require("./modules/events/siem.routes");
 const externalRoutes = require("./routes/external.routes");
+const userRoutes = require("./modules/users/user.routes");
 
 const app = express();
 
@@ -76,6 +77,7 @@ app.use("/api/compliance", complianceRoutes);
 app.use("/api/audit", auditRoutes);
 app.use("/api", siemRoutes);
 app.use("/api/external", externalRoutes);
+app.use("/api/users", userRoutes);
 
 app.use((req, res, next) => {
   next(new ApiError(404, "Not Found"));

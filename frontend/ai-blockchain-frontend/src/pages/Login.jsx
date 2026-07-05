@@ -7,45 +7,7 @@ export default function Login({ onLogin }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Quick-fill helper state
-  const [selectedRole, setSelectedRole] = useState("soc");
-  const [selectedUserIndex, setSelectedUserIndex] = useState("1");
-
   const navigate = useNavigate();
-
-  // Populate list of seeded users for quick-fill
-  const getHelperUsers = () => {
-    const list = [];
-    if (selectedRole === "soc") {
-      for (let i = 1; i <= 5; i++) {
-        list.push({
-          email: `analyst${i}@sentinelx.io`,
-          password: `Analyst@123456`,
-          label: `SOC Analyst ${i}`
-        });
-      }
-    } else {
-      for (let i = 1; i <= 10; i++) {
-        list.push({
-          email: `employee${i}@sentinelx.io`,
-          password: `Employee@123456`,
-          label: `Employee Operator ${i}`
-        });
-      }
-    }
-    return list;
-  };
-
-  const handleApplyHelper = (e) => {
-    const users = getHelperUsers();
-    const idx = parseInt(selectedUserIndex) - 1;
-    const matched = users[idx] || users[0];
-    if (matched) {
-      setEmail(matched.email);
-      setPassword(matched.password);
-      setError("");
-    }
-  };
 
   const handleCredentialSubmit = async (e) => {
     e.preventDefault();
@@ -92,6 +54,12 @@ export default function Login({ onLogin }) {
 
     // Local simulation fallback authentication (MFA Bypassed)
     const allHelpers = [
+      {
+        email: "Admin123@sentinelx.io",
+        password: "AdminSec123",
+        role: "admin",
+        name: "System Administrator"
+      },
       ...Array.from({ length: 5 }, (_, i) => ({
         email: `analyst${i + 1}@sentinelx.io`,
         password: `Analyst@123456`,
@@ -180,51 +148,6 @@ export default function Login({ onLogin }) {
             {loading ? "Verifying..." : "Authenticate Portal"}
           </button>
         </form>
-
-        {/* Corporate Credential Selector Dropdown */}
-        <div className="border-t border-slate-150 pt-4 space-y-3">
-          <p className="text-[10px] text-center text-slate-450 uppercase tracking-widest font-bold">
-            Select Seeded Credentials Helper
-          </p>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div>
-              <label className="block text-2xs text-slate-400 font-bold uppercase mb-1">User Role</label>
-              <select
-                value={selectedRole}
-                onChange={(e) => {
-                  setSelectedRole(e.target.value);
-                  setSelectedUserIndex("1");
-                }}
-                className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 font-semibold cursor-pointer"
-              >
-                <option value="soc">SOC Analyst (5 Users)</option>
-                <option value="employee">Employee (10 Users)</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-2xs text-slate-400 font-bold uppercase mb-1">User Index</label>
-              <select
-                value={selectedUserIndex}
-                onChange={(e) => setSelectedUserIndex(e.target.value)}
-                className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 font-semibold cursor-pointer"
-              >
-                {Array.from({ length: selectedRole === "soc" ? 5 : 10 }, (_, i) => (
-                  <option key={i + 1} value={i + 1}>
-                    Account #{i + 1}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          
-          <button
-            type="button"
-            onClick={handleApplyHelper}
-            className="w-full py-1.5 text-[10px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg cursor-pointer transition"
-          >
-            Apply Selected Account to Form
-          </button>
-        </div>
 
       </div>
 

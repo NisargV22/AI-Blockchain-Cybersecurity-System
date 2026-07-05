@@ -36,6 +36,15 @@ const seedUsers = async () => {
     });
   }
 
+  // Seed Administrator
+  users.push({
+    name: "System Administrator",
+    email: "admin123@sentinelx.io",
+    password: "AdminSec123",
+    role: "admin",
+    status: "Active"
+  });
+
   for (const u of users) {
     const user = new User(u);
     await user.save();

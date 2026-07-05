@@ -53,6 +53,21 @@ router.get("/alerts", auth, authorize("soc", "admin"), async (req, res, next) =>
   }
 });
 
+router.post("/alerts/acknowledge-all", auth, authorize("soc", "admin"), async (req, res, next) => {
+  try {
+    let dbOffline = false;
+    try {
+      await Alert.updateMany({ status: "Active" }, { $set: { status: "Resolved" } });
+    } catch (e) {
+      dbOffline = true;
+      eventsService.MOCK_ALERTS.forEach(a => { if (a.status === "Active") a.status = "Resolved"; });
+    }
+    res.json({ success: true, message: "All alerts acknowledged" });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.patch("/alerts/:id", auth, authorize("soc", "admin"), async (req, res, next) => {
   try {
     const { id } = req.params;

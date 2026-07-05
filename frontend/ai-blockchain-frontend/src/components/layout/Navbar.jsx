@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 
 export default function Navbar({
@@ -14,6 +14,7 @@ export default function Navbar({
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null); // 'investigation', 'admin', null
+  const navRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,8 +26,12 @@ export default function Navbar({
 
   // Close dropdowns on click outside
   useEffect(() => {
-    const handleOutsideClick = () => {
-      setActiveDropdown(null);
+    const handleOutsideClick = (event) => {
+      if (navRef.current && !navRef.current.contains(event.target)) {
+        setActiveDropdown(null);
+        setIsNotificationsOpen(false);
+        setIsProfileOpen(false);
+      }
     };
     document.addEventListener("click", handleOutsideClick);
     return () => document.removeEventListener("click", handleOutsideClick);
@@ -64,7 +69,7 @@ export default function Navbar({
   ];
 
   return (
-    <nav className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm transition-colors duration-250">
+    <nav ref={navRef} className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm transition-colors duration-250">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
@@ -157,8 +162,8 @@ export default function Navbar({
               </>
             )}
 
-            {/* Dropdown: SIEM Administration (SOC Analysts) */}
-            {user.role === "soc" && (
+            {/* Dropdown: SIEM Administration */}
+            {(user.role === "soc" || user.role === "admin") && (
               <div className="relative">
                 <button
                   onClick={() => setActiveDropdown(activeDropdown === "admin" ? null : "admin")}
@@ -191,6 +196,11 @@ export default function Navbar({
                       <NavLink to="/reports" onClick={() => setActiveDropdown(null)} className="block px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 rounded-md transition font-semibold">
                         Compliance Reports
                       </NavLink>
+                      {user.role === "admin" && (
+                        <NavLink to="/admin-users" onClick={() => setActiveDropdown(null)} className="block px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 rounded-md transition font-semibold">
+                          User Management
+                        </NavLink>
+                      )}
                     </div>
                   </div>
                 )}
@@ -230,6 +240,9 @@ export default function Navbar({
                   placeholder="Global search..."
                   value={globalSearch}
                   onChange={(e) => setGlobalSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') navigate('/');
+                  }}
                   className="pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 w-40 text-slate-805"
                 />
               </div>

@@ -381,7 +381,7 @@ router.get("/threat-intel/:ip", auth, authorize("soc", "admin"), async (req, res
 });
 
 // --- 10. SYSTEM TELEMETRY HEALTH ---
-router.get("/system/health", auth, authorize("soc"), async (req, res) => {
+router.get("/system/health", auth, authorize("soc", "admin"), async (req, res) => {
   const mongoose = require("mongoose");
   const axios = require("axios");
   const fs = require("fs");
