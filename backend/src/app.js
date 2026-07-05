@@ -30,7 +30,8 @@ const whitelist = [
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin || whitelist.indexOf(origin) !== -1) {
+    // or requests from localhost or Vercel
+    if (!origin || whitelist.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')) {
       callback(null, true);
     } else {
       callback(new ApiError(403, "CORS policy violation: Unauthorized origin access."));
