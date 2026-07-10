@@ -4,6 +4,15 @@ SentinelX is a state-of-the-art hybrid Security Information and Event Management
 
 ---
 
+### 🌐 Live Cloud Deployment
+* **Frontend Dashboard (Vercel):** [https://sentinelx-24162172004-5650.vercel.app](https://sentinelx-24162172004-5650.vercel.app)
+* **Backend API (Render):** `https://sentinelx-backend.onrender.com`
+* **AI Engine (Render):** `https://sentinelx-ai.onrender.com`
+* **Database (MongoDB Atlas):** Hosted in the cloud
+* **Blockchain Smart Contract (Sepolia Testnet):** `0xC025A7897972A2870F8F1d26D161C460a40463A7`
+
+---
+
 ## 1. Project Architecture Overview
 
 The system is built on a decoupled, high-performance microservices architecture:
@@ -12,8 +21,8 @@ The system is built on a decoupled, high-performance microservices architecture:
 graph TD
     User([SOC Analyst / Corporate Employee]) -->|HTTPS / WSS| Frontend[React / Vite Web Console]
     Frontend -->|API Gateway Queries| Backend[Express Ingestion Backend]
-    Backend -->|Read/Write Logs & Rules| DB[(MongoDB Core Store)]
-    Backend -->|JSON-RPC Hash Anchoring| Blockchain[Hardhat Local Ethereum Node]
+    Backend -->|Read/Write Logs & Rules| DB[(MongoDB Atlas Cloud)]
+    Backend -->|JSON-RPC Hash Anchoring| Blockchain[Ethereum Sepolia Testnet via Alchemy]
     Backend -->|HTTP Telemetry Predict| AI[Python Flask AI Threat Classifier]
     UDP([Syslog Clients]) -->|UDP Syslog Ingest| Backend
 ```
@@ -22,7 +31,7 @@ graph TD
 1. **Frontend (React / Vite)**: A premium dark-themed dashboard styled with CSS custom systems. Provides real-time threat charts, alerts, UBA risk scoring, detection rule editors, and ledger auditing tools.
 2. **Backend (Node.js / Express)**: High-throughput ingestion server that coordinates WebSocket log streaming, validates JSON Web Tokens (JWT), processes RBAC routing, manages active API keys, runs automated SOAR workers, and bridges data to the AI Engine and local Blockchain.
 3. **AI Engine (Python / Flask)**: Runs a trained machine learning classifier model (Scikit-Learn Random Forest/SVM heuristics) to grade event threat risks dynamically from 0% to 100%.
-4. **Blockchain Anchor (Ethereum / Solidity)**: A Solidity smart contract (`LogIntegrity.sol`) compiled and hosted on a Hardhat local node. Anchors batches of log hashes to the ledger to enforce audit-trail immutability.
+4. **Blockchain Anchor (Ethereum / Solidity)**: A Solidity smart contract (`LogIntegrity.sol`) compiled and deployed to the live **Ethereum Sepolia Testnet** via Alchemy. Anchors batches of log hashes to the ledger to enforce audit-trail immutability.
 5. **Database (MongoDB)**: Stores structured log documents, system configuration rules, threat warning profiles, user accounts, and anchored blockchain records.
 
 ---
@@ -74,51 +83,22 @@ The database utilizes the following collections under the `sentinelx` database:
 
 ---
 
-## 5. How to Run the Project (Developer Commands)
+## 5. Cloud Deployment Architecture
 
-Run each command in a separate terminal window from the root of the project directory:
+This project is configured for 100% free cloud deployment:
 
-### Step 1: Start the Local Blockchain Node
-```bash
-cd blockchain
-npm install
-npx hardhat node
-```
+### 1. MongoDB Atlas (Database)
+* A free M0 cluster is used to host the MongoDB database.
+* Network access must be open to `0.0.0.0/0` to allow Render connections.
 
-### Step 2: Deploy the Smart Contract
-Ensure the contract is deployed to the active network:
-```bash
-cd blockchain
-npx hardhat run scripts/deploy.js --network localhost
-```
-*Note: Copy the contract address printed in console and paste it into `backend/.env` under the `CONTRACT_ADDRESS` variable.*
+### 2. Render (Backend & AI)
+* **AI Engine:** Deployed as a web service using `pip install -r requirements.txt` and `python src/app.py`. It runs an isolated Flask server for ML predictions.
+* **Backend:** Deployed as a Node.js web service. Environment variables (`MONGODB_URI`, `AI_SERVICE_URL`, `JWT_SECRET`, `ETH_RPC_URL`, `ETH_PRIVATE_KEY`, `CONTRACT_ADDRESS`) must be provided in the Render dashboard.
 
-### Step 3: Run the database seed (First time setup)
-This populates the database with the 10 Employees, 5 SOC Analysts, and initial config settings:
-```bash
-cd backend
-npm run seed
-```
+### 3. Alchemy & Sepolia (Blockchain)
+* The smart contract is deployed to the Sepolia testnet using Alchemy as the RPC node.
+* Deployment script: `npx hardhat run scripts/deploy.js --network sepolia`
 
-### Step 4: Start the Ingestion Backend
-```bash
-cd backend
-npm install
-npm start
-```
-
-### Step 5: Start the Python AI Engine
-Ensure Python 3 is installed:
-```bash
-cd ai-module
-pip install -r requirements.txt
-python src/app.py
-```
-
-### Step 6: Start the Frontend Console
-```bash
-cd frontend/ai-blockchain-frontend
-npm install
-npm run dev
-```
-Open [http://localhost:5173/](http://localhost:5173/) in your web browser.
+### 4. Vercel (Frontend)
+* The Vite/React frontend is built and deployed using Vercel.
+* The `VITE_API_URL` environment variable is mapped to the Render backend URL to enable seamless full-stack communication.
