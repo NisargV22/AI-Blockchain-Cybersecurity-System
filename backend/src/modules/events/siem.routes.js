@@ -402,10 +402,13 @@ router.get("/system/health", auth, authorize("soc", "admin"), async (req, res) =
 
   // 2. Check Python AI Engine
   try {
-    const aiServiceUrl = process.env.AI_SERVICE_URL || "http://127.0.0.1:5000/predict";
+    let aiServiceUrl = process.env.AI_SERVICE_URL || "http://127.0.0.1:5000/predict";
+    if (!aiServiceUrl.startsWith("http")) {
+      aiServiceUrl = "https://" + aiServiceUrl;
+    }
     const urlObj = new URL(aiServiceUrl);
     const aiHealthUrl = `${urlObj.protocol}//${urlObj.host}/health`;
-    const aiRes = await axios.get(aiHealthUrl, { timeout: 5000 });
+    const aiRes = await axios.get(aiHealthUrl, { timeout: 8000 });
     if (aiRes.data && aiRes.data.status === "UP") {
       health.pythonEngine = "Online";
     }
