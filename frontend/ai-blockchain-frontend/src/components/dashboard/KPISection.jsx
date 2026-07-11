@@ -22,11 +22,11 @@ export default function KPISection({ stats }) {
             </svg>
           </div>
           <div>
-            <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Threats Detected</p>
+            <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider truncate">Threats Detected</p>
             <h3 className="text-2xl font-bold text-slate-900 mt-1 font-mono">
               <AnimatedCounter value={totalAlerts} />
             </h3>
-            <span className="text-[10px] text-rose-600 font-bold bg-rose-50 px-1.5 py-0.5 rounded-md mt-1.5 block w-max">
+            <span className="text-[10px] text-rose-600 font-bold bg-rose-50 px-1.5 py-0.5 rounded-md mt-1.5 inline-block truncate max-w-full">
               ↑ Active Queue
             </span>
           </div>
@@ -40,11 +40,11 @@ export default function KPISection({ stats }) {
             </svg>
           </div>
           <div>
-            <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Ingested Events</p>
+            <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider truncate">Ingested Events</p>
             <h3 className="text-2xl font-bold text-slate-900 mt-1 font-mono">
               <AnimatedCounter value={totalEvents} />
             </h3>
-            <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded-md mt-1.5 block w-max">
+            <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded-md mt-1.5 inline-block truncate max-w-full">
               ↑ System Telemetry
             </span>
           </div>
@@ -58,11 +58,11 @@ export default function KPISection({ stats }) {
             </svg>
           </div>
           <div>
-            <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Blockchain Anchors</p>
+            <p className="text-slate-400 text-[11px] sm:text-xs font-semibold uppercase tracking-wider truncate">Blockchain Anchors</p>
             <h3 className="text-2xl font-bold text-slate-900 mt-1 font-mono">
               <AnimatedCounter value={stats ? Math.ceil(totalEvents / 5) : 40} />
             </h3>
-            <span className="text-[10px] text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded-md mt-1.5 block w-max">
+            <span className="text-[10px] text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded-md mt-1.5 inline-block truncate max-w-full">
               Stable Ledger Feed
             </span>
           </div>
@@ -76,11 +76,11 @@ export default function KPISection({ stats }) {
             </svg>
           </div>
           <div>
-            <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">AI Risk Score</p>
+            <p className="text-slate-400 text-[11px] sm:text-xs font-semibold uppercase tracking-wider truncate">AI Risk Score</p>
             <h3 className="text-2xl font-bold text-slate-900 mt-1 font-mono">
               <AnimatedCounter value={aiRiskScore} />%
             </h3>
-            <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded-md mt-1.5 block w-max">
+            <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded-md mt-1.5 inline-block truncate max-w-full">
               Post index NOMINAL
             </span>
           </div>

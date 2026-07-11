@@ -30,41 +30,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState("");
 
-  const [threats, setThreats] = useState([
-    {
-      id: "TH001",
-      type: "Phishing",
-      severity: "High",
-      status: "Blocked",
-      time: "12:01 PM",
-      ip: "192.168.1.102",
-      affected: "Mail Server",
-      description: "Multiple inbound emails containing zero-day phishing link payloads targeting human resource personnel.",
-      remediation: "Spam filter updated, credentials reset for targeted users, host domain blacklisted.",
-    },
-    {
-      id: "TH002",
-      type: "Malware",
-      severity: "Medium",
-      status: "Blocked",
-      time: "12:05 PM",
-      ip: "10.0.0.15",
-      affected: "Financial Workstation",
-      description: "Trojan infection attempt intercepted by active endpoint protection scanner during attachment download.",
-      remediation: "Device quarantined, antivirus scan completed, infected files purged.",
-    },
-    {
-      id: "TH003",
-      type: "DDoS Attack",
-      severity: "Critical",
-      status: "Mitigated",
-      time: "12:10 PM",
-      ip: "185.220.101.5",
-      affected: "API Gateway",
-      description: "High-volume UDP flood targeting API authentication servers, causing momentary latency spikes.",
-      remediation: "Dynamic rate limiting activated, traffic routed through CDN protection shield, server load normalized.",
-    },
-  ]);
+  const [threats, setThreats] = useState([]);
 
   const [selectedThreat, setSelectedThreat] = useState(null);
   const [globalSearch, setGlobalSearch] = useState("");
@@ -95,7 +61,7 @@ export default function App() {
           }
         });
         const data = await response.json();
-        if (data.success && data.alerts && data.alerts.length > 0) {
+        if (data.success && data.alerts) {
           const formatted = data.alerts.map((a) => ({
             id: a.threatId,
             eventId: a.eventId,

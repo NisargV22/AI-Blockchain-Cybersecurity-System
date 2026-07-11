@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import KPISection from "../components/dashboard/KPISection";
 import ThreatModal from "../components/modals/ThreatModal";
+import LogModal from "../components/modals/LogModal";
 
 export default function Dashboard({ user, accessToken, globalSearch }) {
   const [stats, setStats] = useState(null);
@@ -11,14 +12,20 @@ export default function Dashboard({ user, accessToken, globalSearch }) {
   const [severityFilter, setSeverityFilter] = useState("all"); 
   const [sourceFilter, setSourceFilter] = useState("all"); 
   const [selectedThreat, setSelectedThreat] = useState(null);
+  const [selectedLog, setSelectedLog] = useState(null);
+  const [actionModal, setActionModal] = useState(null); // 'acknowledge' or 'false_positive'
   const [health, setHealth] = useState({
     logDatabase: "Offline",
     pythonEngine: "Offline",
     blockchainAnchor: "Offline",
     logIngestionPipe: "Offline"
   });
+  const [tamperAcknowledged, setTamperAcknowledged] = useState(false);
 
   useEffect(() => {
+    if (localStorage.getItem("tamper_acknowledged") === "true") {
+      setTamperAcknowledged(true);
+    }
     if (globalSearch !== undefined) {
       setSearch(globalSearch);
     }
@@ -59,7 +66,7 @@ export default function Dashboard({ user, accessToken, globalSearch }) {
       let tamperedBatchId = "";
       if (bcData.success && bcData.records) {
         const tamperedBlock = bcData.records.find(r => r.status === "Failed");
-        if (tamperedBlock) {
+        if (tamperedBlock && localStorage.getItem("tamper_acknowledged") !== "true") {
           hasTampered = true;
           tamperedBatchId = tamperedBlock.batchId;
         }
@@ -140,17 +147,34 @@ export default function Dashboard({ user, accessToken, globalSearch }) {
     try {
       await fetch("/api/events/alerts/acknowledge-all", {
         method: "POST",
-        headers: { Authorization: `Bearer ${accessToken}` }
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}` 
+        },
+        body: JSON.stringify({ status: "Resolved" })
       });
-      setAlerts(alerts.map(a => ({ ...a, status: "Resolved" })));
-      alert("All active threat alerts have been acknowledged.");
+      setAlerts(alerts.map(a => a.status === "Active" ? { ...a, status: "Resolved" } : a));
+      setActionModal(null);
     } catch (err) {
       console.error(err);
     }
   };
 
-  const handleMarkFalsePositive = () => {
-    alert("Selected event marked as False Positive. AI weights adjusted.");
+  const handleMarkFalsePositive = async () => {
+    try {
+      await fetch("/api/events/alerts/acknowledge-all", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}` 
+        },
+        body: JSON.stringify({ status: "False Positive" })
+      });
+      setAlerts(alerts.map(a => a.status === "Active" ? { ...a, status: "False Positive" } : a));
+      setActionModal(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleInspectAlert = (alertItem) => {
@@ -191,13 +215,26 @@ export default function Dashboard({ user, accessToken, globalSearch }) {
         </div>
       </div>
 
-      {isLedgerTampered && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl shadow-sm animate-pulse flex items-center gap-3">
-          <span className="text-lg">🚨</span>
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider">Security Alteration Detected</h4>
-            <p className="text-2xs text-rose-600 mt-0.5 font-medium font-sans">One or more database audit records do not match their cryptographic blockchain anchors. Database tampering has been identified! Please audit the ledger immediately.</p>
+      {isLedgerTampered && !tamperAcknowledged && (
+        <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl shadow-sm flex items-center justify-between gap-3 animate-in fade-in">
+          <div className="flex items-center gap-3">
+            <span className="text-lg animate-pulse">🚨</span>
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider">Security Alteration Detected</h4>
+              <p className="text-2xs text-rose-600 mt-0.5 font-medium font-sans">One or more database audit records do not match their cryptographic blockchain anchors. Database tampering has been identified! Please audit the ledger immediately.</p>
+            </div>
           </div>
+          <button 
+            onClick={() => {
+              setTamperAcknowledged(true);
+              setIsLedgerTampered(false);
+              localStorage.setItem("tamper_acknowledged", "true");
+              setAlerts(alerts.filter(a => a.threatId !== "ALT-TAMPER"));
+            }}
+            className="px-3 py-1.5 bg-rose-200 text-rose-800 hover:bg-rose-300 text-xs font-bold rounded-lg transition border-0 cursor-pointer whitespace-nowrap"
+          >
+            Acknowledge & Hide
+          </button>
         </div>
       )}
 
@@ -340,7 +377,11 @@ export default function Dashboard({ user, accessToken, globalSearch }) {
                       }
 
                       return (
-                        <tr key={e._id || idx} className="hover:bg-slate-50/50 transition">
+                        <tr 
+                          key={e._id || idx} 
+                          onClick={() => setSelectedLog(e)}
+                          className="hover:bg-slate-50/50 transition cursor-pointer"
+                        >
                           <td className="p-4 text-slate-500">{timeStr}</td>
                           <td className="p-4 font-bold text-slate-750">{e._id.substring(0, 10).toUpperCase()}</td>
                           <td className="p-4">
@@ -454,13 +495,13 @@ export default function Dashboard({ user, accessToken, globalSearch }) {
             
             <div className="space-y-2 text-xs font-bold">
               <button
-                onClick={handleAcknowledgeAll}
+                onClick={() => setActionModal('acknowledge')}
                 className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition border-0 cursor-pointer text-center block"
               >
                 Acknowledge All Alerts
               </button>
               <button
-                onClick={handleMarkFalsePositive}
+                onClick={() => setActionModal('false_positive')}
                 className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition border-0 cursor-pointer text-center block"
               >
                 Mark as False Positive
@@ -514,6 +555,46 @@ export default function Dashboard({ user, accessToken, globalSearch }) {
           threat={selectedThreat} 
           onClose={() => setSelectedThreat(null)} 
         />
+      )}
+
+      {/* Raw SIEM Log Detail Modal */}
+      {selectedLog && (
+        <LogModal 
+          log={selectedLog} 
+          onClose={() => setSelectedLog(null)} 
+        />
+      )}
+
+      {/* Action Confirmation Modal */}
+      {actionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col p-6 space-y-4">
+            <h3 className="font-bold text-slate-800 text-lg">
+              {actionModal === 'acknowledge' ? 'Acknowledge Alerts?' : 'Mark as False Positive?'}
+            </h3>
+            <p className="text-xs text-slate-500">
+              {actionModal === 'acknowledge' 
+                ? 'Are you sure you want to mark all active alerts as Resolved? This action will update the global SIEM dashboard.' 
+                : 'Are you sure you want to mark all active alerts as False Positive? The AI engine will adjust its heuristic weights accordingly.'}
+            </p>
+            <div className="flex gap-3 pt-2">
+              <button 
+                onClick={() => setActionModal(null)} 
+                className="flex-1 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition border-0 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={actionModal === 'acknowledge' ? handleAcknowledgeAll : handleMarkFalsePositive} 
+                className={`flex-1 py-2 text-xs font-bold text-white rounded-lg transition border-0 cursor-pointer ${
+                  actionModal === 'acknowledge' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-rose-600 hover:bg-rose-700'
+                }`}
+              >
+                Confirm Action
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
     </div>

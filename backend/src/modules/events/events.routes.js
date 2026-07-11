@@ -55,12 +55,13 @@ router.get("/alerts", auth, authorize("soc", "admin"), async (req, res, next) =>
 
 router.post("/alerts/acknowledge-all", auth, authorize("soc", "admin"), async (req, res, next) => {
   try {
+    const targetStatus = req.body.status || "Resolved";
     let dbOffline = false;
     try {
-      await Alert.updateMany({ status: "Active" }, { $set: { status: "Resolved" } });
+      await Alert.updateMany({ status: "Active" }, { $set: { status: targetStatus } });
     } catch (e) {
       dbOffline = true;
-      eventsService.MOCK_ALERTS.forEach(a => { if (a.status === "Active") a.status = "Resolved"; });
+      eventsService.MOCK_ALERTS.forEach(a => { if (a.status === "Active") a.status = targetStatus; });
     }
     res.json({ success: true, message: "All alerts acknowledged" });
   } catch (err) {

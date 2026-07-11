@@ -11,6 +11,13 @@ export default function ActivitySection({ blockchainSearch, setBlockchainSearch,
     { time: "12:01:05", severity: "SYSTEM", text: "AI Threat Scanner completed heuristic filesystem analysis on root clusters.", color: "emerald" },
     { time: "12:05:11", severity: "AUDIT", text: "Consensus transaction verifies reconciled on ledger Block BLK002.", color: "blue" }
   ]);
+  const [acknowledged, setAcknowledged] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem("tamper_acknowledged") === "true") {
+      setAcknowledged(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (!accessToken) return;
@@ -105,18 +112,31 @@ export default function ActivitySection({ blockchainSearch, setBlockchainSearch,
     b.hash.toLowerCase().includes(blockchainSearch.toLowerCase())
   );
 
-  const isAnyTampered = blockchainLogs.some(log => log.status === "Failed");
+  const isAnyTampered = !acknowledged && blockchainLogs.some(log => log.status === "Failed");
+
+  const handleAcknowledgeTampering = () => {
+    setAcknowledged(true);
+    localStorage.setItem("tamper_acknowledged", "true");
+  };
 
   return (
     <div className="space-y-8">
       
       {isAnyTampered && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl shadow-sm animate-pulse flex items-center gap-3">
-          <span className="text-lg">🚨</span>
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider">Security Alteration Detected</h4>
-            <p className="text-2xs text-rose-600 mt-0.5 font-medium">One or more database audit records do not match their cryptographic blockchain anchors. Tampering or deletion has been identified!</p>
+        <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl shadow-sm flex items-center justify-between gap-3 animate-in fade-in">
+          <div className="flex items-center gap-3">
+            <span className="text-lg animate-pulse">🚨</span>
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider">Security Alteration Detected</h4>
+              <p className="text-2xs text-rose-600 mt-0.5 font-medium">One or more database audit records do not match their cryptographic blockchain anchors. Tampering or deletion has been identified!</p>
+            </div>
           </div>
+          <button 
+            onClick={handleAcknowledgeTampering}
+            className="px-3 py-1.5 bg-rose-200 text-rose-800 hover:bg-rose-300 text-xs font-bold rounded-lg transition border-0 cursor-pointer whitespace-nowrap"
+          >
+            Acknowledge & Hide
+          </button>
         </div>
       )}
       

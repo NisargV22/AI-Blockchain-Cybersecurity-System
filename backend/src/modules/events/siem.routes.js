@@ -94,7 +94,14 @@ router.delete("/playbooks/:id", auth, authorize("soc"), async (req, res) => {
 // --- 3. UBA ANALYTICS ENDPOINTS ---
 router.get("/uba/alerts", auth, authorize("soc", "admin"), async (req, res) => {
   try {
-    const alerts = await UbaAlert.find().sort({ createdAt: -1 });
+    let alerts = await UbaAlert.find().sort({ createdAt: -1 });
+    if (alerts.length === 0) {
+      await UbaAlert.insertMany([
+        { userId: "viewer@sentinelx.io", anomalyType: "off_hours", details: "Access logged at 3:14 AM from viewer@sentinelx.io. Baseline average: 2:00 PM.", severity: "Medium" },
+        { userId: "analyst@sentinelx.io", anomalyType: "exfiltration", details: "High-volume transfer logged: 25,000 Bytes. Baseline limit: 1,200 Bytes.", severity: "Critical" }
+      ]);
+      alerts = await UbaAlert.find().sort({ createdAt: -1 });
+    }
     res.json({ success: true, alerts });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -103,7 +110,14 @@ router.get("/uba/alerts", auth, authorize("soc", "admin"), async (req, res) => {
 
 router.get("/uba/baselines", auth, authorize("soc", "admin"), async (req, res) => {
   try {
-    const baselines = await UserBaseline.find();
+    let baselines = await UserBaseline.find();
+    if (baselines.length === 0) {
+      await UserBaseline.insertMany([
+        { userId: "analyst@sentinelx.io", avgLoginHour: 10, allowedLocations: ["US", "IN"], typicalPorts: [80, 443, 22], avgBytesTransferred: 1200, rollingCount: 42 },
+        { userId: "viewer@sentinelx.io", avgLoginHour: 14, allowedLocations: ["US"], typicalPorts: [80, 443], avgBytesTransferred: 800, rollingCount: 15 }
+      ]);
+      baselines = await UserBaseline.find();
+    }
     res.json({ success: true, baselines });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
