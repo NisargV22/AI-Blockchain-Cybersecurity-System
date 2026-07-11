@@ -409,7 +409,8 @@ router.get("/system/health", auth, authorize("soc", "admin"), async (req, res) =
     const urlObj = new URL(aiServiceUrl);
     const aiHealthUrl = `${urlObj.protocol}//${urlObj.host}/health`;
     const aiRes = await axios.get(aiHealthUrl, { timeout: 8000 });
-    if (aiRes.data && aiRes.data.status === "UP") {
+    const st = aiRes.data && aiRes.data.status ? aiRes.data.status.toLowerCase() : "";
+    if (st === "up" || st === "online") {
       health.pythonEngine = "Online";
     }
   } catch (err) {
