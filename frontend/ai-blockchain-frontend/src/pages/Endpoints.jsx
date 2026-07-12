@@ -13,13 +13,9 @@ export default function Endpoints({ accessToken }) {
 
   const handleDownload = (os) => {
     setDownloading(true);
-    // Simulate generation and download delay
-    setTimeout(() => {
-      setDownloading(false);
-      setDownloadSuccess(os);
-      
-      // Trigger actual file download
-      const content = `# SentinelX Forwarder Agent for ${os}
+    
+    // Trigger actual file download SYNCHRONOUSLY to prevent browser blocking
+    const content = `# SentinelX Forwarder Agent for ${os}
 import time
 import json
 import urllib.request
@@ -93,16 +89,20 @@ def start_forwarding():
 if __name__ == "__main__":
     start_forwarding()
 `;
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = os === 'Windows' ? 'SentinelAgent_x64.py' : 'sentinel-agent_amd64.py';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = os === 'Windows' ? 'SentinelAgent_x64.py' : 'sentinel-agent_amd64.py';
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
 
+    // Simulate generation delay for UI only
+    setTimeout(() => {
+      setDownloading(false);
+      setDownloadSuccess(os);
       setTimeout(() => setDownloadSuccess(null), 5000);
     }, 1500);
   };
