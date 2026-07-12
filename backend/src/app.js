@@ -16,6 +16,7 @@ const externalRoutes = require("./routes/external.routes");
 const userRoutes = require("./modules/users/user.routes");
 
 const app = express();
+app.set('trust proxy', 1); // Trust the load balancer/Vercel proxy to parse true client IP
 
 // 1. HTTP Security Headers
 app.use(helmet());
