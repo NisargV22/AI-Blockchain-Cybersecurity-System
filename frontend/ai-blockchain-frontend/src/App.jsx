@@ -27,9 +27,16 @@ function ProtectedRoute({ children, allowedRoles, userRole }) {
 }
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
-  const [accessToken, setAccessToken] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return sessionStorage.getItem("sentinelx_auth") === "true";
+  });
+  const [user, setUser] = useState(() => {
+    const savedUser = sessionStorage.getItem("sentinelx_user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+  const [accessToken, setAccessToken] = useState(() => {
+    return sessionStorage.getItem("sentinelx_token") || "";
+  });
 
   const [threats, setThreats] = useState([]);
 
@@ -38,10 +45,7 @@ export default function App() {
   const [threatSearch, setThreatSearch] = useState("");
   const [blockchainSearch, setBlockchainSearch] = useState("");
 
-  useEffect(() => {
-    setThreatSearch(globalSearch);
-    setBlockchainSearch(globalSearch);
-  }, [globalSearch]);
+
 
   const [notifications, setNotifications] = useState([
     { id: 1, type: "critical", message: "Critical Malware Attempt Blocked", time: "15:20:05", read: false },
@@ -91,13 +95,55 @@ export default function App() {
     setIsAuthenticated(true);
     setUser(userData);
     setAccessToken(userData.accessToken);
+    
+    // Persist to session storage
+    sessionStorage.setItem("sentinelx_auth", "true");
+    sessionStorage.setItem("sentinelx_user", JSON.stringify(userData));
+    sessionStorage.setItem("sentinelx_token", userData.accessToken);
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setUser(null);
     setAccessToken("");
+    
+    // Clear session storage
+    sessionStorage.removeItem("sentinelx_auth");
+    sessionStorage.removeItem("sentinelx_user");
+    sessionStorage.removeItem("sentinelx_token");
   };
+
+  useEffect(() => {
+    setThreatSearch(globalSearch);
+    setBlockchainSearch(globalSearch);
+  }, [globalSearch]);
+
+  // --- Inactivity Auto-Logout Monitor ---
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    let timeoutId;
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      // 30 minutes = 30 * 60 * 1000 = 1800000 ms
+      timeoutId = setTimeout(() => {
+        handleLogout();
+        alert("Session expired due to 30 minutes of inactivity. Please log in again.");
+      }, 1800000);
+    };
+
+    // Attach listeners to reset timer on activity
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+    events.forEach(event => document.addEventListener(event, resetTimer, true));
+    
+    resetTimer(); // Initialize timer
+
+    return () => {
+      clearTimeout(timeoutId);
+      events.forEach(event => document.removeEventListener(event, resetTimer, true));
+    };
+  }, [isAuthenticated]);
+  // --------------------------------------
 
   if (!isAuthenticated) {
     return (
