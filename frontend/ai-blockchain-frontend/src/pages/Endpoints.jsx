@@ -17,6 +17,19 @@ export default function Endpoints({ accessToken }) {
     setTimeout(() => {
       setDownloading(false);
       setDownloadSuccess(os);
+      
+      // Trigger actual file download
+      const content = `# SentinelX Forwarder Agent for ${os}\n# This is a generated payload.\n\nprint("SentinelX Agent Running...")`;
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = os === 'Windows' ? 'SentinelAgent_x64.py' : 'sentinel-agent_amd64.py';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
       setTimeout(() => setDownloadSuccess(null), 5000);
     }, 1500);
   };
