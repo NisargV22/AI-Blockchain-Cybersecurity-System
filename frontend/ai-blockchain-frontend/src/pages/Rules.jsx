@@ -150,6 +150,38 @@ export default function Rules({ accessToken }) {
     }
   };
 
+  const seedOwaspRules = async () => {
+    const owaspRules = [
+      { name: "A01: SQL Injection (SQLi)", condition: { field: "type", operator: "contains", value: "sql", timeWindow: 60, threshold: 1 }, action: "soar", severity: "Critical" },
+      { name: "A02: Cryptographic Failure", condition: { field: "protocol", operator: "equals", value: "HTTP", timeWindow: 300, threshold: 50 }, action: "alert", severity: "High" },
+      { name: "A03: XSS Payload Detected", condition: { field: "type", operator: "contains", value: "xss", timeWindow: 60, threshold: 1 }, action: "soar", severity: "Critical" },
+      { name: "A04: Insecure Design (Admin panel sweep)", condition: { field: "destPort", operator: "equals", value: "8080", timeWindow: 30, threshold: 20 }, action: "alert", severity: "Medium" },
+      { name: "A05: Security Misconfiguration", condition: { field: "type", operator: "equals", value: "directory_traversal", timeWindow: 60, threshold: 2 }, action: "alert", severity: "High" },
+      { name: "A07: Identification and Auth Failures (Brute Force)", condition: { field: "type", operator: "contains", value: "brute", timeWindow: 30, threshold: 10 }, action: "soar", severity: "Critical" },
+      { name: "A08: Software and Data Integrity Failures", condition: { field: "type", operator: "equals", value: "tampering", timeWindow: 120, threshold: 1 }, action: "soar", severity: "High" },
+      { name: "A09: Security Logging and Monitoring Failures", condition: { field: "type", operator: "equals", value: "log_deletion", timeWindow: 60, threshold: 1 }, action: "alert", severity: "High" },
+      { name: "A10: Server-Side Request Forgery (SSRF)", condition: { field: "type", operator: "contains", value: "ssrf", timeWindow: 60, threshold: 1 }, action: "soar", severity: "Critical" }
+    ];
+
+    if (!confirm("This will deploy the OWASP Top 10 detection policies to your database. Proceed?")) return;
+
+    for (const rule of owaspRules) {
+      try {
+        await fetch("/api/rules", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`
+          },
+          body: JSON.stringify(rule)
+        });
+      } catch (e) {
+        console.error("Failed to seed rule", e);
+      }
+    }
+    fetchRules();
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       
@@ -158,12 +190,20 @@ export default function Rules({ accessToken }) {
           <h2 className="text-xl font-bold text-slate-900">Custom Correlation Rules</h2>
           <p className="text-xs text-slate-500 mt-1">Manage detection patterns and alert thresholds for incoming traffic</p>
         </div>
-        <button
-          onClick={openCreateModal}
-          className="w-full sm:w-auto px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md hover:shadow-blue-500/10 transition cursor-pointer border-0"
-        >
-          Create Correlation Rule
-        </button>
+        <div className="w-full sm:w-auto flex gap-2">
+          <button
+            onClick={seedOwaspRules}
+            className="w-full sm:w-auto px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg shadow-sm transition cursor-pointer border-0"
+          >
+            Seed OWASP Top 10
+          </button>
+          <button
+            onClick={openCreateModal}
+            className="w-full sm:w-auto px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md hover:shadow-blue-500/10 transition cursor-pointer border-0"
+          >
+            Create Correlation Rule
+          </button>
+        </div>
       </div>
 
       {/* Rules Registry Table */}
