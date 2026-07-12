@@ -193,9 +193,6 @@ export default function Navbar({
                       <NavLink to="/retention" onClick={() => setActiveDropdown(null)} className="block px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 rounded-md transition font-semibold">
                         Retention Policy
                       </NavLink>
-                      <NavLink to="/endpoints" onClick={() => setActiveDropdown(null)} className="block px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 rounded-md transition font-semibold">
-                        Endpoint Agents
-                      </NavLink>
                       <NavLink to="/reports" onClick={() => setActiveDropdown(null)} className="block px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 rounded-md transition font-semibold">
                         Compliance Reports
                       </NavLink>

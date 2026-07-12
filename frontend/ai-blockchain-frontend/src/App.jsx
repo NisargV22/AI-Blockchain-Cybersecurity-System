@@ -17,7 +17,6 @@ import Analytics from "./pages/Analytics";
 import ApiSettings from "./pages/ApiSettings";
 import RetentionSettings from "./pages/RetentionSettings";
 import AdminUsers from "./pages/AdminUsers";
-import Endpoints from "./pages/Endpoints";
 
 function ProtectedRoute({ children, allowedRoles, userRole }) {
   if (!allowedRoles.includes(userRole)) {
@@ -258,15 +257,6 @@ export default function App() {
               element={
                 <ProtectedRoute allowedRoles={["soc", "admin"]} userRole={user.role}>
                   <RetentionSettings accessToken={accessToken} />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/endpoints"
-              element={
-                <ProtectedRoute allowedRoles={["soc", "admin"]} userRole={user.role}>
-                  <Endpoints accessToken={accessToken} />
                 </ProtectedRoute>
               }
             />

@@ -321,22 +321,6 @@ export default function Dashboard({ user, accessToken, globalSearch }) {
               >
                 Web Services (Port 80/443)
               </button>
-              <button
-                onClick={() => setSourceFilter("network")}
-                className={`px-3 py-1 rounded-md transition cursor-pointer ${
-                  sourceFilter === "network" ? "bg-slate-800 text-white shadow-sm" : "bg-white text-slate-650 border border-slate-200 hover:bg-slate-100"
-                }`}
-              >
-                Internal Network (DNS/TCP)
-              </button>
-              <button
-                onClick={() => setSourceFilter("host")}
-                className={`px-3 py-1 rounded-md transition cursor-pointer ${
-                  sourceFilter === "host" ? "bg-slate-800 text-white shadow-sm" : "bg-white text-slate-650 border border-slate-200 hover:bg-slate-100"
-                }`}
-              >
-                Host System Audit (SSH/FTP)
-              </button>
             </div>
 
             {/* Structured Log Table */}
