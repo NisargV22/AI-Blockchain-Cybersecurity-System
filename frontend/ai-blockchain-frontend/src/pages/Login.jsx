@@ -97,9 +97,18 @@ export default function Login({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center px-4 animate-in fade-in duration-300">
+    <div 
+      className="min-h-screen flex flex-col justify-center items-center px-4 animate-in fade-in duration-300 relative"
+      style={{
+        backgroundImage: "url('/login-bg.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-[2px] z-0"></div>
       
-      <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-xl p-8 space-y-6">
+      <div className="w-full max-w-md bg-white/90 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-8 space-y-6 z-10 relative">
         
         <div className="text-center space-y-2">
           <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20 mx-auto">
