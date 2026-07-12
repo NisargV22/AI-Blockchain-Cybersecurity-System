@@ -18,7 +18,22 @@ const router = express.Router();
 // --- 1. RULE ENGINE ENDPOINTS ---
 router.get("/rules", auth, authorize("soc", "admin"), async (req, res) => {
   try {
-    const rules = await Rule.find();
+    let rules = await Rule.find();
+    if (rules.length === 0) {
+      await Rule.insertMany([
+        { name: "OWASP A01: Broken Access Control", condition: { field: "type", operator: "equals", value: "unauthorized_access", timeWindow: 60, threshold: 3 }, action: "alert", severity: "High", enabled: true },
+        { name: "OWASP A02: Cryptographic Failures", condition: { field: "type", operator: "equals", value: "weak_crypto", timeWindow: 60, threshold: 1 }, action: "alert", severity: "Critical", enabled: true },
+        { name: "OWASP A03: Injection (SQLi/XSS)", condition: { field: "type", operator: "equals", value: "sql_injection", timeWindow: 60, threshold: 1 }, action: "soar", severity: "Critical", enabled: true },
+        { name: "OWASP A04: Insecure Design", condition: { field: "type", operator: "equals", value: "insecure_design", timeWindow: 60, threshold: 1 }, action: "alert", severity: "Medium", enabled: true },
+        { name: "OWASP A05: Security Misconfiguration", condition: { field: "type", operator: "equals", value: "misconfiguration", timeWindow: 60, threshold: 1 }, action: "alert", severity: "High", enabled: true },
+        { name: "OWASP A06: Vulnerable Components", condition: { field: "type", operator: "equals", value: "cve_exploit", timeWindow: 60, threshold: 1 }, action: "soar", severity: "Critical", enabled: true },
+        { name: "OWASP A07: Authentication Failures", condition: { field: "type", operator: "equals", value: "brute_force", timeWindow: 120, threshold: 15 }, action: "alert", severity: "High", enabled: true },
+        { name: "OWASP A08: Data Integrity Failures", condition: { field: "type", operator: "equals", value: "tampering", timeWindow: 60, threshold: 1 }, action: "soar", severity: "Critical", enabled: true },
+        { name: "OWASP A09: Logging & Monitoring Failures", condition: { field: "type", operator: "equals", value: "log_deletion", timeWindow: 60, threshold: 1 }, action: "alert", severity: "High", enabled: true },
+        { name: "OWASP A10: Server-Side Request Forgery", condition: { field: "type", operator: "equals", value: "ssrf", timeWindow: 60, threshold: 2 }, action: "soar", severity: "Critical", enabled: true }
+      ]);
+      rules = await Rule.find();
+    }
     res.json({ success: true, rules });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
